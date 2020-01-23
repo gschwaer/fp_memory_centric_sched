@@ -120,5 +120,8 @@ CPU mySystem {
     APP_SRC = "main.c";
     APP_SRC = "uart-driver.c";
     APP_SRC = "printu.c";
+    APP_SRC = "memory_prefetching.S";
+    APP_SRC = "hardware_setup.S";
+    APP_SRC = "sorting.c";
   };
 };
