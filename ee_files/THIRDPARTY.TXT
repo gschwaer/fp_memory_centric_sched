@@ -1,0 +1,109 @@
+THIRDPARTY.TXT
+--------------
+
+Preface
+-------
+
+This file is part of the License of ERIKA v3. This file lists the
+dependencies on third party source code that you may need to compile
+or link in order to build an ERIKA v3 executable. There are two kind
+of third party contents to be considered:
+
+- Third Party source code that is currently present inside the ERIKA
+  v3 repository
+
+- Third Party source code that you may need to link during the
+  compilation and linking process
+
+The ERIKA v3 License provides you an exception for the above mentioned
+cases. For the complete license text please check the file named
+LICENSE.TXT
+
+Full information about licensing of ERIKA v3 can be found at the
+address:
+http://www.erika-enterprise.com/index.php/erika3/licensing.html
+
+-------------------------------------------------------------------- 
+
+
+
+Third party source code included in the ERIKA v3 Repository
+-----------------------------------------------------------
+
+Infineon Tricore
+-----------------------------------------------------------
+A set of startup files were derived from the same code provdied by Infineon.
+All the code (with the corresponding Infineon license) is stored in
+pkg/arch/tricore/no_iLLD
+
+The Infineon license is:
+                                 IMPORTANT NOTICE
+
+ Infineon Technologies AG (Infineon) is supplying this file for use
+ exclusively with Infineon's microcontroller products. This file can be freely
+ distributed within development tools that are supporting such microcontroller
+ products.
+
+ THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+ OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+ INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
+ OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+
+
+
+
+Third party source code that you may need to link
+-------------------------------------------------
+
+Platform: AVR8, Arduino
+(*) Arduino.cc - C/C++ microcontroller libraries
+    License: GNU Lesser General Public License as published by the
+             Free Software Foundation; either version 2.1 of the License,
+             or (at your option) any later version.
+    Website: https://www.arduino.cc
+
+Platform: MPPA
+(*) Kalray Inc. - MPPA AccessCore SDK
+    License: Contact Kalray Inc.
+    Website: http://www.kalrayinc.com/kalray/products/#software
+
+Platform: Cortex-M, NXP S32K1XX
+(*) NXP S32DS-ARM: S32 Design Studio IDE for Arm based MCUs
+    License: Contact NXP.
+    Website: https://www.nxp.com/support/developer-resources/run-time-software/s32-design-studio-ide/s32-design-studio-ide-for-arm-based-mcus:S32DS-ARM
+
+Platform: Renesas RH850, E2X-FCC2
+(*) Embark E2x Software
+    License: Contact Renesas.
+    Website: https://www.renesas.com/us/en/products/microcontrollers-microprocessors/rh850/softtools.html
+
+Platform: All
+(*) For all the members of the COMASSO Association (http://www.comasso.org),
+    Evidence provides the possibility to statically link ERIKA3 to any version of 
+    the "COMASSO Basic Software Modules", as defined at point 1.6 of the 
+    COMASSO License and Contribution Agreement, Version 3.
+
+(*) FatFs - Generic FAT Filesystem Module  Rx.xx
+    License : Copyright (C) 20xx, ChaN, all right reserved.
+
+              FatFs module is an open source software. Redistribution and use of FatFs in
+              source and binary forms, with or without modification, are permitted provided
+              that the following condition is met:
+             
+              1. Redistributions of source code must retain the above copyright notice,
+                 this condition and the following disclaimer.
+             
+              This software is provided by the copyright holder and contributors "AS IS"
+              and any warranties related to this software are DISCLAIMED.
+              The copyright owner or contributors be NOT LIABLE for any damages caused
+              by use of this software.
+    Website:  http://elm-chan.org/fsw/ff/00index_e.html
+
+Platform: Infineon 32-bit TriCoreTM AURIXTM  Microcontroller
+- Infineon AURIXTM  Security Software HSM SHE+ 
+- Infineon AURIXTM PRO-SILTM SafeTlib
+- Infineon AURIXTM iLLD Driver
+- Infineon MC-ISAR AURIXTM MCAL Driver
+License: Closed source. Contact Infineon Technologies directly.
+Website: https://www.infineon.com/cms/en/product/microcontroller/32-bit-tricore-microcontroller
