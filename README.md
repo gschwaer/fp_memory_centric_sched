@@ -1,48 +1,57 @@
 DPREM Erika on Jailhouse for Jetson TX2
 =======================================
 
+
 Prerequisites on Host
 ---------------------
-There is a docker configuration in `docker.zip` that can be used. Download the file
-[`eclipse-rtdruid3-photon-linux-gtk-x86_64_20190524_gh65.tar.gz` (Eclipse Photon, Linux 64bit)](https://www.erika-enterprise.com/index.php/download/erika-v3-download.html) and use the `build.sh` to create a docker container that you can run with the `launch.sh`.
+
+There is a docker configuration in `docker/` that can be used. To use it you folder structure should look like this:
+```
+somewhere
+├── docker
+└── code
+    └── workspace
+        └── Erika_DPREM
+```
+Download the file [`eclipse-rtdruid3-photon-linux-gtk-x86_64_20190524_gh65.tar.gz` (Eclipse Photon, Linux 64bit)](https://www.erika-enterprise.com/index.php/download/erika-v3-download.html), put it in the docker folder and use the `build.sh` to create a docker container that you can run with the `launch.sh`.
+
 
 Prerequisites on TX2
 --------------------
+
 Jailhouse needs to be installed just as described in <https://github.com/evidence/linux-jailhouse-jetson>.
-Compiling, installing and starting jailhouse are also described there. Additionally there are some scripts in `jailhouse-master_dprem` like `make.sh`, `recompile_restart.sh` and `start_jailhouse.sh`.
+Compiling, installing and starting jailhouse are also described there. Additionally there are some helpful scripts for Jailhouse developement: `make.sh` and `recompile_restart.sh`.
 
-In the folder `inmates/gschwaer-testing` are some scripts as well as Erika binaries.
+In the folder `benchmarking/` are some scripts as well as Erika binaries (sub directories).
 
-Config
-* Root cell: configs/arm64/jetson-tx2-colored.cell
-* Test cell0: configs/arm64/jetson-tx2-gschwaer-testing-p0.cell
-* Test cell1: configs/arm64/jetson-tx2-gschwaer-testing-p1.cell
-* Test cell2: configs/arm64/jetson-tx2-gschwaer-testing-p2.cell
 
 UART
 ----
-To use the second UART (UART-C) ref. to `start_uart_c.sh`. To monitor UARTS use minicom -D /dev/ttyUSB0 (or whatever your USB to serial adapter is detected as).
+
+One UART is used by Jailhouse inbuild printk function __and__ the Erika calls to printk.
+
+To use the second UART (UART-C) ref. to `benchmarking/enable_uart_c.sh`. To monitor UART-C use minicom -D /dev/ttyUSB0 (or whatever your USB to serial adapter is detected as). It is advised to use minicom on you host machine to not slow down the TX2.
+
 
 Erika
 -----
+
 * Every inmate needs to be compiled, saved and started separately because they have different cache partitions (see `config.h`).
-* To compile Erika applications for Jailhouse in Eclipse you need some files from the Jailhouse compilation. So after compiling Jailhouse copy the jailhouse folder back from the TX2 to the Host and replace the existing folder. The Erika Makefiles will then find the necessary libraries in the jailhouse folder.
+* To compile Erika applications for Jailhouse in Eclipse you need some files from the Jailhouse compilation. So after compiling Jailhouse copy the jailhouse folder back from the TX2 to the Host in place of the existing folder. The Erika Makefiles will then find the necessary libraries in the jailhouse folder.
 * Setup of dependencies see below
+
 
 Jailhouse
 ---------
+
 * There are two versions of memory arbitration implemented: TDMA and fixed priority. You can switch from one to the other in the file `include/jailhouse/config.h`.
 * There is a define in the `fixed_priority.c` code which suspends linux cores in case the memory is in use. It should be easily adaptable for tdma as well.
+* Compilation might fail while Jailhouse is running.
 
-Bugs and Quirks
----------------
-It happens every now and then, that ...
-* the USB serial to UART dies -> reboot
-* the Erika inmate just stops executing -> reboot
-* same for Linux -> hard reset
 
-Test Run
---------
+Test Runs
+---------
+
 Example for sorting benchmark on one test cell:
 1. `sudo ./jetson_clocks.sh`
 1. `./enable_uart_c.sh`
@@ -51,9 +60,17 @@ Example for sorting benchmark on one test cell:
 1. `./run_erika_inmate.sh 0 sorting/erika_inmate.bin`
 1. [on host] `minicom -D /dev/ttyUSB0 -C sorting_raw_data.txt`
 
+Configs used:
+
+* Root cell: configs/arm64/jetson-tx2-colored.cell
+* Test cell0: configs/arm64/jetson-tx2-gschwaer-testing-p0.cell
+* Test cell1: configs/arm64/jetson-tx2-gschwaer-testing-p1.cell
+* Test cell2: configs/arm64/jetson-tx2-gschwaer-testing-p2.cell
+
 
 Erika Dependencies Setup
 ------------------------
+
 For the following you can also specify workspace paths if the files are in your workspace.
 Project Properties > Oil > Erika Files Location:
 * Manual `<path in your FS>/Erika_DPREM/ee_files`
@@ -75,3 +92,12 @@ Add the following as Include Directory, File System Path:
 * `<path in your FS>/jailhouse-master/include/inmates/lib`
 * `<path in your FS>/jailhouse-master/include/inmates/lib/arm64/include`
 * `<path in your FS>/jailhouse-master/include/inmates/lib/arm-common/include`
+
+
+Bugs and Quirks
+---------------
+
+It happens every now and then, that ...
+* the USB serial to UART dies -> reboot
+* the Erika inmate just stops executing -> reboot
+* same for Linux -> hard reset
