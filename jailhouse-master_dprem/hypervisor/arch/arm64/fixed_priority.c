@@ -10,8 +10,8 @@
 #include <asm/irqchip.h>
 #include <asm/spinlock.h>
 
-// Priority is based on MAX_PRIORITY-cell_id+1 (higher cell id -> lower priority)
-#define MAX_PRIORITY		3
+// Priority is based on MAX_PRIORITY-cell_id (higher cell id -> lower priority)
+#define MAX_PRIORITY		6
 
 //#define SUSPEND_LINUX
 #define TOKEN_FREE		0xFF
@@ -56,35 +56,28 @@ u64 timer_ticks_to_ns(u64 ticks)
 static int request_memory(struct per_cpu *cpu_data)
 {
 	unsigned int cpu_id = cpu_data->cpu_id;
-	unsigned int priority = MAX_PRIORITY - cpu_data->cell->config->id + 1;
-
-	//printk("Memory request from cpu %d at priority %d\n", cpu_id, priority);
-	//printk("Current token holder: %d\nCurrent token priority: %d\n",token_owner,token_priority);
+	unsigned int priority = MAX_PRIORITY - cpu_data->cell->config->id;
 
 	spin_lock(&memory_lock);
 
 #ifdef SUSPEND_LINUX
 	bool token_was_free = (token_owner == TOKEN_FREE);
 #endif
+
 	memory_requests[cpu_id] = priority;
-
 	if (priority > token_priority) {
-		// todo: check if we are not the token's owner
-		if (token_owner != TOKEN_FREE) {
+		if (token_owner != TOKEN_FREE && token_owner != cpu_id) {
 			//printk("Send interrupt to reclaim the token from %d and give to %d\n", token_owner, cpu_id);
-			irqchip_set_pending(per_cpu(token_owner),10);
-		}
-		else
-		{
-
+			irqchip_set_pending(per_cpu(token_owner),JAILHOUSE_MEMORY_ARBITRATION_SGI_MEMORY_PHASE_ENDED);
 		}
 		token_owner    = cpu_id;
 		token_priority = priority;
 	}
+
 #ifdef SUSPEND_LINUX
 	// suspend Linux if token was acquired
 	bool token_is_free = (token_owner == TOKEN_FREE);
-	if(/*token_was_free == true && token_is_free == false*/ cpu_id == 0)
+	if(token_was_free == true && token_is_free == false)
 	{
 		//printk("Suspending Linux\n");
 		arch_suspend_cpu(3); // 3 = Linux core 0
@@ -103,8 +96,6 @@ static int request_memory(struct per_cpu *cpu_data)
 static int disable_memory_request(unsigned int cpu_id)
 {
 	struct cell *cell;
-	
-	//printk("Current token holder: %d - Current token priority: %d\n", token_owner, token_priority);
 
 	spin_lock(&memory_lock);
 
@@ -116,24 +107,24 @@ static int disable_memory_request(unsigned int cpu_id)
 		token_priority = TOKEN_NULL_PRIORITY;
 
 		for_each_cell(cell) {
-			unsigned int cpu_id = first_cpu(cell->cpu_set);
-			//printk("iterating %d: prio=%d\n", cpu_id, memory_requests[cpu_id]);
-			if (memory_requests[cpu_id] > token_priority) {
-				token_priority = memory_requests[cpu_id];
-				token_owner    = cpu_id;
+			unsigned int cpu_id_it = first_cpu(cell->cpu_set);
+			if (memory_requests[cpu_id_it] > token_priority) {
+				token_priority = memory_requests[cpu_id_it];
+				token_owner    = cpu_id_it;
 			}
 		}
 
 		//printk("New token holder: %d\nNew token priority: %d\n",token_owner,token_priority);
 
-		if (token_priority != TOKEN_NULL_PRIORITY) {
+		if (token_owner != TOKEN_FREE) {
 			//printk("Send interrupt to pass the token from %d to %d\n", cpu_id, token_owner);
-			irqchip_set_pending(per_cpu(token_owner),15);
+			irqchip_set_pending(per_cpu(token_owner),JAILHOUSE_MEMORY_ARBITRATION_SGI_MEMORY_PHASE_STARTED);
 		}
+
 #ifdef SUSPEND_LINUX
 		// resume Linux if token was released
 		bool token_is_free = (token_owner == TOKEN_FREE);
-		if(/*token_is_free == true*/ cpu_id == 0)
+		if(token_is_free == true)
 		{
 			//printk("Resuming Linux\n");
 			arch_resume_cpu(3); // 3 = Linux core 0
@@ -212,6 +203,7 @@ long fixed_priority_hypercall(struct per_cpu *cpu_data, unsigned long action_cod
 
 		case 0xFFFF:
 		{
+			// currently not working / not tested
 			enable_memory_request_test_arbitration_overhead(cpu_data, 0);
 			return JAILHOUSE_MEMORY_ARBITRATION_ACK;
 		}

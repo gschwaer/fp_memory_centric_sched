@@ -1,9 +1,9 @@
 #!/bin/bash
-./stop_jailhouse.sh
+sudo jailhouse disable
 ./make.sh
 if [ $? -ne 0 ]; then
 	exit $?
 fi
 ./install.sh
-./start_jailhouse.sh
+./benchmarking/start_jailhouse.sh
 #./add_test_cell.sh

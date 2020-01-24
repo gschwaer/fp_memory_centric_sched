@@ -7,13 +7,17 @@
 #include "memory_prefetching.h"
 #include "system_config.h"
 
-#include "benchmarking/sorting.h"
+#include "benchmarking/average.h"
 
 #include <inmate.h>
 
-extern uint64_t size_memory_application_task1;
-extern void *memory_application_task1; // max size: SIZE_DATA_SECTION
 
+#define A57_CORE_TO_BENCHMARK 2
+
+
+extern const uint8_t app_data[SIZE_DATA_SECTION];
+
+OsEE_reg a57_core_id;
 OsEE_reg activation_ticks;
 TaskType task_activation_isr_id;
 TaskType application_task_id1;
@@ -41,22 +45,24 @@ static void application_task1( void )
 		DPREM_begin_memory_phase();
 
 		// clear and prefetch memory
-		clear_cache_partition_L2(L2_FIRST_WAY, L2_LAST_WAY, PARTITION_FIRST_SET, PARTITION_LAST_SET);
-		prefetch_memory((uint64_t)memory_application_task1, size_memory_application_task1/CACHE_LINE_SIZE);
+		clear_cache_partition_L2(L2_FIRST_WAY, L2_LAST_WAY, PARTITION_FIRST_SET(a57_core_id), PARTITION_LAST_SET(a57_core_id));
+		prefetch_memory((uint64_t)app_data, SIZE_DATA_SECTION/CACHE_LINE_SIZE);
 
 		DPREM_end_memory_phase();
 		OsEE_reg phase_change_ts = osEE_aarch64_gtimer_get_ticks();
 
 		// Execution Phase: execute task
-		sorting_task_main();
+		task_calculate_average();
 
 		OsEE_reg finish_ts = osEE_aarch64_gtimer_get_ticks();
 
 		// calculate response time
-		printu("<App1:%lu,%lu,%lu>\n",
-				osEE_aarch64_gtimer_ticks_to_ns(release_ts),
-				osEE_aarch64_gtimer_ticks_to_ns(phase_change_ts),
-				osEE_aarch64_gtimer_ticks_to_ns(finish_ts));
+		if(a57_core_id == A57_CORE_TO_BENCHMARK) {
+			printu("%lu,%lu,%lu\n",
+					osEE_aarch64_gtimer_ticks_to_ns(release_ts),
+					osEE_aarch64_gtimer_ticks_to_ns(phase_change_ts),
+					osEE_aarch64_gtimer_ticks_to_ns(finish_ts));
+		}
 	}
 }
 
@@ -65,11 +71,18 @@ int main(void){
 	disable_predictor();
 	disable_prefetcher();
 
+	// figure out A57 core id
+	// the used cache partition depends on this
+	// it should return values 0-3 depending on the core Erika is run on
+	OsEE_reg reg;
+	OSEE_AARCH64_MRS(reg, MPIDR_EL1);
+	a57_core_id = (reg & 0x3);
+
 	// Initialize hypervisor based memory arbitration
 	DPREM_init();
 
 	// Create activation task
-	OsEE_reg activation_frequency_hz = 20;
+	OsEE_reg activation_frequency_hz = 500-a57_core_id; // use drifting frequencies
     CreateTask(&task_activation_isr_id, OSEE_TASK_TYPE_ISR2, task_activation_isr, 1U, 1U, 1U, OSEE_SYSTEM_STACK);
     SetISR2Source(task_activation_isr_id, OSEE_GTIMER_IRQ);
 
@@ -91,7 +104,7 @@ int main(void){
     // Set the activation timer
     uint64_t ticks_per_second = osEE_aarch64_gtimer_get_freq();
     activation_ticks = ticks_per_second / activation_frequency_hz;
-    printk("Erika: Starting with activation frequency %lu Hz.\n", activation_frequency_hz);
+    printk("Erika: Starting on A57-core %u with activation frequency %lu Hz.\n", a57_core_id, activation_frequency_hz);
     osEE_aarch64_gtimer_start(activation_ticks, OSEE_AARCH64_GTIMER_COUNTDOWN);
 
     /* endless loop*/

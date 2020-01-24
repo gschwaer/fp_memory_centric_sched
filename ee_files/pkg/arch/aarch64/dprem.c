@@ -260,10 +260,12 @@ static void memory_phase_started_ISR( void )
 	CONST(OsEE_reg, AUTOMATIC) flags = osEE_begin_primitive();
 	osEE_lock_core(p_cdb);
 
-	p_ccb->mem_arbit_status = MEMORY_TOKEN_ACQUIRED;
-	OsEE_bool ret = DPREM_resume_highest_priority_task_from_ISR(p_cdb);
-	if(ret == OSEE_M_FALSE) {
-		printk("Erika: memory_phase_started_ISR should resume task, but there was none!\n");
+	if(p_ccb->mem_arbit_status == MEMORY_TOKEN_REQUESTED) {
+		p_ccb->mem_arbit_status = MEMORY_TOKEN_ACQUIRED;
+		OsEE_bool ret = DPREM_resume_highest_priority_task_from_ISR(p_cdb);
+		if(ret == OSEE_M_FALSE) {
+			printk("Erika: memory_phase_started_ISR should resume task, but there was none!\n");
+		}
 	}
 
 	// end atomic & unlock core structs
@@ -280,10 +282,14 @@ static void memory_phase_ended_ISR( void )
 	CONST(OsEE_reg, AUTOMATIC) flags = osEE_begin_primitive();
 	osEE_lock_core(p_cdb);
 
-	p_ccb->mem_arbit_status = MEMORY_TOKEN_REQUESTED;
-	OsEE_reg ret = DPREM_suspend_highest_priority_active_task_from_ISR(p_cdb);
-	if(ret == OSEE_M_FALSE) {
-		printk("Erika: memory_phase_ended_ISR should suspend task, but there was none!\n");
+	//printk("Erika: memory_phase_ended_ISR\n");
+
+	if(p_ccb->mem_arbit_status == MEMORY_TOKEN_ACQUIRED) {
+		p_ccb->mem_arbit_status = MEMORY_TOKEN_REQUESTED;
+		OsEE_reg ret = DPREM_suspend_highest_priority_active_task_from_ISR(p_cdb);
+		if(ret == OSEE_M_FALSE) {
+			printk("Erika: memory_phase_ended_ISR should suspend task, but there was none!\n");
+		}
 	}
 
 	// end atomic & unlock core structs
@@ -311,8 +317,6 @@ DPREM_init
 		printk("Erika: DPREM Initialization failed!");
 		return;
 	}
-
-	printk("Erika: DPREM Initialized.\n");
 }
 
 FUNC(void, OS_CODE)

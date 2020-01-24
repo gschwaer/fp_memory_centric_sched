@@ -566,7 +566,6 @@ OSEE_STATIC_INLINE FUNC(void, OS_CODE)
 {
   /* Interrupt acknowledge */
   osEE_gicc_eoi(p_from->hdb.isr2_src);
-  //printk("Sending EOI %u\n", p_from->hdb.isr2_src);
   osEE_aarch64_change_context_from_isr2_end(p_from, p_to);
 }
 

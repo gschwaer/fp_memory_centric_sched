@@ -1,7 +1,9 @@
 #ifndef __SYSTEM_CONFIG_H__
 #define __SYSTEM_CONFIG_H__
 
-#include "config.h"
+// the maximum data size for each benchmark
+#define SIZE_DATA_SECTION (448*1024) /* this leaves 64k for text and Erika */
+#define PARTITION_SIZE (512*1024)
 
 // cache infos
 #define CACHE_LINE_SIZE 64 /* byte */
@@ -20,7 +22,7 @@
 #define L2_LAST_WAY (L2_WAYS-1)
 #define L2_FIRST_SET 0
 #define L2_LAST_SET (L2_SETS-1)
-#define PARTITION_FIRST_SET ((L2_SETS / NUM_CPUS) * CACHE_PARTITION)
-#define PARTITION_LAST_SET (((L2_SETS / NUM_CPUS) * (CACHE_PARTITION + 1)) - 1)
+#define PARTITION_FIRST_SET(cluster_cpu_id) ((L2_SETS / NUM_CPUS) * (cluster_cpu_id))
+#define PARTITION_LAST_SET(cluster_cpu_id) (((L2_SETS / NUM_CPUS) * ((cluster_cpu_id) + 1)) - 1)
 
 #endif /* __SYSTEM_CONFIG_H__ */

@@ -72,26 +72,32 @@ Erika Dependencies Setup
 ------------------------
 
 For the following you can also specify workspace paths if the files are in your workspace.
+
 Project Properties > Oil > Erika Files Location:
+
 * Manual `<path in your FS>/Erika_DPREM/ee_files`
+
 Project Properties > Oil > Generator properties:
+
 * Enable project specific settings
 * AArch64 - Compiler prefix: `aarch64-linux-gnu-`
 * AArch64 - Jailhouse dir: `<path in your FS>/jailhouse-master`
 * AArch64 - Jailhouse version: `0.9.1`
+
 Project Properties > C/C++ General > Preprocessor Include Paths, Macros etc.:
-Go to Entries > GNU C > CDT User Settings Entries:
-Add the following as Include Directory, File System Path:
-* `/usr/lib/gcc-cross/aarch64-linux-gnu/7/include`
-* `<path in your FS>/jailhouse-master/hypervisor`
-* `<path in your FS>/jailhouse-master/hypervisor/include`
-* `<path in your FS>/jailhouse-master/hypervisor/arch/arm64/include`
-* `<path in your FS>/jailhouse-master/hypervisor/arch/arm-common/include`
-* `<path in your FS>/jailhouse-master/include`
-* `<path in your FS>/jailhouse-master/include/arch/arm64`
-* `<path in your FS>/jailhouse-master/include/inmates/lib`
-* `<path in your FS>/jailhouse-master/include/inmates/lib/arm64/include`
-* `<path in your FS>/jailhouse-master/include/inmates/lib/arm-common/include`
+
+* Go to Entries > GNU C > CDT User Settings Entries:
+* Add the following as Include Directory, File System Path:
+	* `/usr/lib/gcc-cross/aarch64-linux-gnu/7/include`
+	* `<path in your FS>/jailhouse-master/hypervisor`
+	* `<path in your FS>/jailhouse-master/hypervisor/include`
+	* `<path in your FS>/jailhouse-master/hypervisor/arch/arm64/include`
+	* `<path in your FS>/jailhouse-master/hypervisor/arch/arm-common/include`
+	* `<path in your FS>/jailhouse-master/include`
+	* `<path in your FS>/jailhouse-master/include/arch/arm64`
+	* `<path in your FS>/jailhouse-master/include/inmates/lib`
+	* `<path in your FS>/jailhouse-master/include/inmates/lib/arm64/include`
+	* `<path in your FS>/jailhouse-master/include/inmates/lib/arm-common/include`
 
 
 Bugs and Quirks
