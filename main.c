@@ -7,7 +7,7 @@
 #include "memory_prefetching.h"
 #include "system_config.h"
 
-#include "sorting.h"
+#include "benchmarking/sorting.h"
 
 #include <inmate.h>
 

@@ -122,6 +122,6 @@ CPU mySystem {
     APP_SRC = "printu.c";
     APP_SRC = "memory_prefetching.S";
     APP_SRC = "hardware_setup.S";
-    APP_SRC = "sorting.c";
+    APP_SRC = "benchmarking/sorting.c";
   };
 };
