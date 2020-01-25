@@ -36,7 +36,7 @@ To use the second UART (UART-C) ref. to `benchmarking/enable_uart_c.sh`. To moni
 Erika
 -----
 
-* Every inmate needs to be compiled, saved and started separately because they have different cache partitions (see `config.h`).
+* Every inmate gets its cache partition from its A57 core ID (in the range of 0-3 on TX2).
 * To compile Erika applications for Jailhouse in Eclipse you need some files from the Jailhouse compilation. So after compiling Jailhouse copy the jailhouse folder back from the TX2 to the Host in place of the existing folder. The Erika Makefiles will then find the necessary libraries in the jailhouse folder.
 * Setup of dependencies see below
 
@@ -44,8 +44,8 @@ Erika
 Jailhouse
 ---------
 
-* There are two versions of memory arbitration implemented: TDMA and fixed priority. You can switch from one to the other in the file `include/jailhouse/config.h`.
-* There is a define in the `fixed_priority.c` code which suspends linux cores in case the memory is in use. It should be easily adaptable for tdma as well.
+* There are two versions of memory arbitration implemented: TDMA and fixed priority. You can switch from one to the other in the file `include/jailhouse/config.h` (+ recompile & restart).
+* There is a define in the `fixed_priority.c` code which suspends linux cores in case the memory is in use (untested!). It should be easily adaptable for tdma as well.
 * Compilation might fail while Jailhouse is running.
 
 
@@ -57,7 +57,8 @@ Example for sorting benchmark on one test cell:
 1. `./enable_uart_c.sh`
 1. `./start_jailhouse.sh`
 1. `./add_test_cell.sh 0`
-1. `./run_erika_inmate.sh 0 sorting/erika_inmate.bin`
+1. `./hush_linux.sh`
+1. `./run_erika_inmate.sh sorting/erika_inmate.bin 0`
 1. [on host] `minicom -D /dev/ttyUSB0 -C sorting_raw_data.txt`
 
 Configs used:
