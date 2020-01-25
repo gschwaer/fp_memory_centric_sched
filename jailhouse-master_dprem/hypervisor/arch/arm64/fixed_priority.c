@@ -80,9 +80,10 @@ static int request_memory(struct per_cpu *cpu_data)
 	if(token_was_free == true && token_is_free == false)
 	{
 		//printk("Suspending Linux\n");
-		arch_suspend_cpu(3); // 3 = Linux core 0
-		arch_suspend_cpu(4); // 4 = Linux core 1
-		arch_suspend_cpu(5); // 5 = Linux core 2
+		unsigned int cpu;
+		for_each_cpu(cpu, root_cell.cpu_set) {
+			arch_suspend_cpu(cpu);
+		}
 	}
 #endif
 
@@ -127,9 +128,10 @@ static int disable_memory_request(unsigned int cpu_id)
 		if(token_is_free == true)
 		{
 			//printk("Resuming Linux\n");
-			arch_resume_cpu(3); // 3 = Linux core 0
-			arch_resume_cpu(4); // 4 = Linux core 1
-			arch_resume_cpu(5); // 5 = Linux core 2
+			unsigned int cpu;
+			for_each_cpu(cpu, root_cell.cpu_set) {
+				arch_resume_cpu(cpu);
+			}
 		}
 #endif
 	}
