@@ -53,13 +53,14 @@ Test Runs
 ---------
 
 Example for sorting benchmark on one test cell:
+1. `./hush_linux.sh` (after this no new ssh connections are accepted)
 1. `sudo ./jetson_clocks.sh`
 1. `./enable_uart_c.sh`
 1. `./start_jailhouse.sh`
 1. `./add_test_cell.sh 0`
-1. `./hush_linux.sh`
 1. `./run_erika_inmate.sh sorting/erika_inmate.bin 0`
-1. [on host] `minicom -D /dev/ttyUSB0 -C sorting_raw_data.txt`
+1. [on host] `minicom -D /dev/ttyUSB0 -C benchmark_sorting_capture_core0.csv`
+1. (alt:) setup using minicom, leave without resetting Ctrl+A,Q then use `cat /dev/ttyUSB0 > benchmark_sorting_capture_core0.csv`
 
 Configs used:
 
