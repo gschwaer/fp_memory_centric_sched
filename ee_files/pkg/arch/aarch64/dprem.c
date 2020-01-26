@@ -239,8 +239,6 @@ DPREM_suspend_running_task
 			osEE_unlock_core(p_cdb);
 			osEE_change_context_from_running(p_curr_tdb, p_ccb->p_curr);
 			osEE_lock_core(p_cdb);
-
-			p_curr_tcb->current_prio = p_curr_tdb->dispatch_prio;
 		} else {
 			printk("Erika: DPREM_suspend_running_task called from isr? (ignored)\n");
 			print_scheduler_queues();
@@ -373,6 +371,23 @@ DPREM_end_memory_phase(
 	} else {
 		printk("Erika: hvc(TDMA_HYPERCALL_ACTION_END_MEM_PHASE) responded with %ld\n", hvc_res);
 	}
+
+	// end atomic & unlock core structs
+	osEE_unlock_core(p_cdb);
+	osEE_end_primitive(flags);
+}
+
+FUNC(void, OS_CODE)
+DPREM_end_execution_phase(
+		void
+)
+{
+	CONSTP2VAR(OsEE_CDB, AUTOMATIC, OS_APPL_DATA) p_cdb = osEE_get_curr_core();
+	CONSTP2VAR(OsEE_CCB, AUTOMATIC, OS_APPL_DATA) p_ccb = p_cdb->p_ccb;
+
+	// begin atomic & lock core structs
+	CONST(OsEE_reg, AUTOMATIC) flags = osEE_begin_primitive();
+	osEE_lock_core(p_cdb);
 
 	// restore priority to dispatch priority
 	p_ccb->p_curr->p_tcb->current_prio = p_ccb->p_curr->dispatch_prio;

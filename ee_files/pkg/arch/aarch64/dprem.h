@@ -21,4 +21,9 @@ DPREM_end_memory_phase
 		void
 );
 
+FUNC(void, OS_CODE)
+DPREM_end_execution_phase(
+		void
+);
+
 #endif /* DPREM_H */
