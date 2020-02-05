@@ -14,6 +14,7 @@
 #define MAX_PRIORITY		6
 
 //#define SUSPEND_LINUX
+
 #define TOKEN_FREE		0xFF
 #define TOKEN_NULL_PRIORITY	0x00
 
@@ -82,7 +83,7 @@ static int request_memory(struct per_cpu *cpu_data)
 		//printk("Suspending Linux\n");
 		unsigned int cpu;
 		for_each_cpu(cpu, root_cell.cpu_set) {
-			arch_suspend_cpu(cpu);
+			arch_fast_suspend_cpu(cpu);
 		}
 	}
 #endif
