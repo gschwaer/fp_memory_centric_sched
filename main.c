@@ -8,6 +8,7 @@
 #include "system_config.h"
 
 #include "benchmarking/average.h"
+#include "benchmarking/sha.h"
 
 #include <inmate.h>
 
@@ -79,7 +80,8 @@ static void application_task1_func( void )
 		// Execution Phase: begin
 
 		// execute benchmark
-		task_calculate_average();
+		//benchmark_calculate_average();
+		benchmark_calculate_sha();
 
 		// Execution Phase: end (enabling interrupts)
 		OsEE_reg finish_ts = osEE_aarch64_gtimer_get_ticks();

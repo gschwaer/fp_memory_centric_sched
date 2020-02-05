@@ -54,7 +54,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="benchmarking/sha1/test.c|benchmarking/a.out|benchmarking/generate_random_bytes.c|docker|jailhouse-master_dprem|ee_files" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="benchmarking/sha/input_small.c|benchmarking/tacle-bench|benchmarking/sha1/test.c|benchmarking/a.out|benchmarking/generate_random_bytes.c|docker|jailhouse-master_dprem|ee_files" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -124,5 +124,10 @@ CPU mySystem {
     APP_SRC = "hardware_setup.S";
     APP_SRC = "benchmarking/app_data.c";
     APP_SRC = "benchmarking/average.c";
+    APP_SRC = "benchmarking/sha.c";
+    APP_SRC = "benchmarking/sha/sha.c";
+    APP_SRC = "benchmarking/sha/memcpy.c";
+    APP_SRC = "benchmarking/sha/memhelper.c";
+    APP_SRC = "benchmarking/sha/memset.c";
   };
 };
