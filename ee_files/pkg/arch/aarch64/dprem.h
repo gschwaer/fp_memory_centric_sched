@@ -2,6 +2,7 @@
 #define DPREM_H
 
 #include "ee_compiler.h"
+#include "ee_platform_types.h"
 
 FUNC(void, OS_CODE)
 DPREM_init
@@ -15,7 +16,7 @@ DPREM_begin_memory_phase
 		void
 );
 
-FUNC(void, OS_CODE)
+FUNC(OsEE_reg, OS_CODE)
 DPREM_end_memory_phase
 (
 		void
@@ -23,7 +24,7 @@ DPREM_end_memory_phase
 
 FUNC(void, OS_CODE)
 DPREM_end_execution_phase(
-		void
+		OsEE_reg
 );
 
 #endif /* DPREM_H */

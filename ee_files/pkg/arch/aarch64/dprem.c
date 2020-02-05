@@ -150,9 +150,6 @@ DPREM_suspend_highest_priority_active_task_from_ISR
 
 	// move highest priority task from stacked queue to suspended queue
 	if(p_highest_priority_stacked_sn != NULL) {
-		// restore priority to dispatch priority
-		p_highest_priority_stacked_sn->p_tdb->p_tcb->current_prio = p_highest_priority_stacked_sn->p_tdb->ready_prio;
-
 		list_remove(&p_ccb->p_stk_sn, p_highest_priority_stacked_sn);
 		list_push_to_head(&p_ccb->p_suspended_sn, p_highest_priority_stacked_sn);
 		return OSEE_M_TRUE;
@@ -197,7 +194,7 @@ DPREM_resume_highest_priority_task_from_ISR
 
 	// move highest priority task from suspended queue to the head of regular tasks in the stacked queue
 	if(p_highest_priority_suspended_sn != NULL) {
-		// set priority to ceiling priority
+		// set priority to ceiling priority (might be necessary if the initial memory access request was denied)
 		p_highest_priority_suspended_sn->p_tdb->p_tcb->current_prio = MAX_TASK_PRIORITY;
 
 		list_remove(&p_ccb->p_suspended_sn, p_highest_priority_suspended_sn);
@@ -295,6 +292,7 @@ static void memory_phase_ended_ISR( void )
 	osEE_end_primitive(flags);
 }
 
+
 // === API functions ===
 
 FUNC(void, OS_CODE)
@@ -353,7 +351,7 @@ DPREM_begin_memory_phase(
 	osEE_end_primitive(flags);
 }
 
-FUNC(void, OS_CODE)
+FUNC(OsEE_reg, OS_CODE)
 DPREM_end_memory_phase(
 		void
 )
@@ -372,21 +370,24 @@ DPREM_end_memory_phase(
 		printk("Erika: hvc(TDMA_HYPERCALL_ACTION_END_MEM_PHASE) responded with %ld\n", hvc_res);
 	}
 
+
 	// end atomic & unlock core structs
 	osEE_unlock_core(p_cdb);
-	osEE_end_primitive(flags);
+	// don't enable interrupts for the execution phase to be not interrupted
+	//osEE_end_primitive(flags);
+	return flags;
 }
 
 FUNC(void, OS_CODE)
 DPREM_end_execution_phase(
-		void
+		OsEE_reg flags
 )
 {
 	CONSTP2VAR(OsEE_CDB, AUTOMATIC, OS_APPL_DATA) p_cdb = osEE_get_curr_core();
 	CONSTP2VAR(OsEE_CCB, AUTOMATIC, OS_APPL_DATA) p_ccb = p_cdb->p_ccb;
 
 	// begin atomic & lock core structs
-	CONST(OsEE_reg, AUTOMATIC) flags = osEE_begin_primitive();
+	//CONST(OsEE_reg, AUTOMATIC) flags = osEE_begin_primitive();
 	osEE_lock_core(p_cdb);
 
 	// restore priority to dispatch priority
