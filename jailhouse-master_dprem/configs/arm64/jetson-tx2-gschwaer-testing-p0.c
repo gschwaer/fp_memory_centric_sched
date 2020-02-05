@@ -87,7 +87,7 @@ struct {
 			},
 
 			/* Assigning quarter of the colors */
-			.colors=0x000000ff,
+			.colors=0xff000000,
 		},
 	},
 
