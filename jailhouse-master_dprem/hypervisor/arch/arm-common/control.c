@@ -80,6 +80,26 @@ void arch_suspend_cpu(unsigned int cpu_id)
 	}
 }
 
+void arch_fast_suspend_cpu(unsigned int cpu_id)
+{
+	struct per_cpu *target_data = per_cpu(cpu_id);
+	bool target_suspended;
+
+	spin_lock(&target_data->control_lock);
+
+	target_data->suspend_cpu = true;
+	target_suspended = target_data->cpu_suspended;
+
+	spin_unlock(&target_data->control_lock);
+
+	if (!target_suspended) {
+		/*
+		 * Send a maintenance signal (SGI_EVENT) to the target CPU.
+		 */
+		arm_cpu_kick(cpu_id);
+	}
+}
+
 void arch_resume_cpu(unsigned int cpu_id)
 {
 	struct per_cpu *target_data = per_cpu(cpu_id);

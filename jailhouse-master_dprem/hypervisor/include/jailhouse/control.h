@@ -165,6 +165,24 @@ void panic_park(void);
 void arch_suspend_cpu(unsigned int cpu_id);
 
 /**
+ * Suspend a remote CPU.
+ * @param cpu_id	ID of the target CPU.
+ *
+ * Suspension means that the target CPU is no longer executing cell code or
+ * arbitrary hypervisor code. It may actively busy-wait in the hypervisor
+ * context, so the suspension time should be kept short.
+ *
+ * The function doesn't wait for the target CPU to enter suspended state.
+ *
+ * @note This function must not be invoked for the caller's CPU.
+ *
+ * @see arch_resume_cpu
+ * @see arch_reset_cpu
+ * @see arch_park_cpu
+ */
+void arch_fast_suspend_cpu(unsigned int cpu_id);
+
+/**
  * Resume a suspended remote CPU.
  * @param cpu_id	ID of the target CPU.
  *

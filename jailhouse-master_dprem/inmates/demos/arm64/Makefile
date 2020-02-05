@@ -12,9 +12,10 @@
 
 include $(INMATES_LIB)/Makefile.lib
 
-INMATES := gic-demo.bin uart-demo.bin ivshmem-demo.bin stress_4M.bin stress_4M_GPREM.bin stress_4M_MG.bin test.bin my-gic-demo.bin my-gic-demo-2.bin empty.bin my-gic-demo-0.bin hc_overhead.bin arb_overhead_1.bin arb_overhead_2.bin
+INMATES := gic-demo.bin uart-demo.bin ivshmem-demo.bin stress_4M.bin stress_4M_GPREM.bin stress_4M_MG.bin test.bin my-gic-demo.bin my-gic-demo-2.bin empty.bin my-gic-demo-0.bin hc_overhead.bin arb_overhead_1.bin arb_overhead_2.bin cache-demo.bin
 
 gic-demo-y	:= ../arm/gic-demo.o
+cache-demo-y	:= ../arm/cache-demo.o
 my-gic-demo-y	:= ../arm/my-gic-demo.o
 my-gic-demo-0-y	:= ../arm/my-gic-demo-0.o
 my-gic-demo-2-y	:= ../arm/my-gic-demo-2.o
