@@ -12,6 +12,12 @@ TaskType memory_phase_started_isr_id;
 TaskType memory_phase_ended_isr_id;
 
 
+FUNC(bool, OS_CODE)
+DPREM_resume_highest_priority_task
+(
+		P2VAR(OsEE_CDB, AUTOMATIC, OS_APPL_DATA)  p_cdb
+);
+
 FUNC(void, OS_CODE)
 DPREM_suspend_running_task
 (
@@ -124,6 +130,30 @@ static void list_insert_before(struct OsEE_SN_tag** p_list_sn, struct OsEE_SN_ta
 }
 #define list_push_to_tail(list, item) list_insert_before((list), (item), NULL)
 
+static void list_insert_after(struct OsEE_SN_tag** p_list_sn, struct OsEE_SN_tag* p_sn, struct OsEE_SN_tag* p_ref_sn)
+{
+	if(*p_list_sn == NULL) {
+		p_sn->p_next = NULL;
+		*p_list_sn = p_sn;
+		return;
+	}
+
+	struct OsEE_SN_tag* p_curr_sn = *p_list_sn;
+	while(p_curr_sn != NULL) {
+		if(p_curr_sn == p_ref_sn) {
+			p_sn->p_next = p_curr_sn->p_next;
+			p_curr_sn->p_next = p_sn;
+			return;
+		}
+		p_curr_sn = p_curr_sn->p_next;
+	}
+}
+
+static bool list_is_empty(struct OsEE_SN_tag** p_list_sn)
+{
+	return (*p_list_sn == NULL);
+}
+
 FUNC(OsEE_bool, OS_CODE)
 DPREM_suspend_highest_priority_active_task_from_ISR
 (
@@ -203,6 +233,37 @@ DPREM_resume_highest_priority_task_from_ISR
 		} else {
 			list_insert_before(&p_ccb->p_stk_sn, p_highest_priority_suspended_sn, p_first_regular_stacked_sn);
 		}
+		return OSEE_M_TRUE;
+	}
+
+	return OSEE_M_FALSE;
+}
+
+FUNC(bool, OS_CODE)
+DPREM_resume_highest_priority_task
+(
+		P2VAR(OsEE_CDB, AUTOMATIC, OS_APPL_DATA)  p_cdb
+)
+{
+	CONSTP2VAR(OsEE_CCB, AUTOMATIC, OS_APPL_DATA) p_ccb = p_cdb->p_ccb;
+
+	// find highest priority task in suspended queue
+	struct OsEE_SN_tag* p_curr_sn = p_ccb->p_suspended_sn;
+	struct OsEE_SN_tag* p_highest_priority_suspended_sn = NULL;
+	while(p_curr_sn != NULL) {
+		OsEE_TCB *p_curr_tcb = p_curr_sn->p_tdb->p_tcb;
+		bool curr_sn_is_highest_priority = p_highest_priority_suspended_sn == NULL ||
+										   p_curr_tcb->current_prio > p_highest_priority_suspended_sn->p_tdb->p_tcb->current_prio;
+		if(curr_sn_is_highest_priority) {
+			p_highest_priority_suspended_sn = p_curr_sn;
+		}
+		p_curr_sn = p_curr_sn->p_next;
+	}
+
+	// move highest priority task from suspended queue to the stacked queue after the current head
+	if(p_highest_priority_suspended_sn != NULL) {
+		list_remove(&p_ccb->p_suspended_sn, p_highest_priority_suspended_sn);
+		list_insert_after(&p_ccb->p_stk_sn, p_highest_priority_suspended_sn, p_ccb->p_stk_sn);
 		return OSEE_M_TRUE;
 	}
 
@@ -315,7 +376,7 @@ DPREM_init
 	}
 }
 
-FUNC(void, OS_CODE)
+FUNC(OsEE_reg, OS_CODE)
 DPREM_begin_memory_phase(
 		void
 )
@@ -327,9 +388,16 @@ DPREM_begin_memory_phase(
 	CONST(OsEE_reg, AUTOMATIC) flags = osEE_begin_primitive();
 	osEE_lock_core(p_cdb);
 
+	OsEE_reg begin_memory_phase_ts = osEE_aarch64_gtimer_get_ticks();
+
+	if(p_ccb->mem_arbit_status == MEMORY_TOKEN_ACQUIRED) {
+		printk("DPREM_begin_memory_phase called while having the token!\n");
+	}
+
 	while(p_ccb->mem_arbit_status != MEMORY_TOKEN_ACQUIRED) {
 		if(p_ccb->mem_arbit_status != MEMORY_TOKEN_REQUESTED) {
 			int64_t hvc_res = hvc(JAILHOUSE_HC_MEMORY_ARBITRATION, JAILHOUSE_MEMORY_ARBITRATION_BEGIN_MEM_PHASE, 0);
+			//int64_t hvc_res = JAILHOUSE_MEMORY_ARBITRATION_ACK;
 			if(hvc_res == JAILHOUSE_MEMORY_ARBITRATION_ACK) {
 				p_ccb->mem_arbit_status = MEMORY_TOKEN_ACQUIRED;
 			} else if(hvc_res == JAILHOUSE_MEMORY_ARBITRATION_NACK) {
@@ -349,6 +417,8 @@ DPREM_begin_memory_phase(
 	// end atomic & unlock core structs
 	osEE_unlock_core(p_cdb);
 	osEE_end_primitive(flags);
+
+	return begin_memory_phase_ts;
 }
 
 FUNC(OsEE_reg, OS_CODE)
@@ -364,6 +434,7 @@ DPREM_end_memory_phase(
 	osEE_lock_core(p_cdb);
 
 	int64_t hvc_res = hvc(JAILHOUSE_HC_MEMORY_ARBITRATION, JAILHOUSE_MEMORY_ARBITRATION_END_MEM_PHASE, 0);
+	//int64_t hvc_res = JAILHOUSE_MEMORY_ARBITRATION_ACK;
 	if(hvc_res == JAILHOUSE_MEMORY_ARBITRATION_ACK) {
 		p_ccb->mem_arbit_status = MEMORY_TOKEN_NONE;
 	} else {
@@ -393,7 +464,20 @@ DPREM_end_execution_phase(
 	// restore priority to dispatch priority
 	p_ccb->p_curr->p_tcb->current_prio = p_ccb->p_curr->dispatch_prio;
 
+	if(list_is_empty(&p_ccb->p_suspended_sn) == false) {
+		// there is at least another task waiting, release it
+		DPREM_resume_highest_priority_task(p_cdb);
+	}
+
 	// end atomic & unlock core structs
 	osEE_unlock_core(p_cdb);
 	osEE_end_primitive(flags);
+}
+
+FUNC(void, OS_CODE)
+DPREM_debug(
+		void
+)
+{
+	print_scheduler_queues();
 }
