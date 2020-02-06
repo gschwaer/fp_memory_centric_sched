@@ -26,6 +26,9 @@ typedef unsigned long LONG;
 //typedef unsigned size_t;
 #include <stddef.h>
 
+#include <ee_platform_types.h>
+#undef FUNC // don't use the FUNC macro because it will be defined in sha.c as well
+
 /* Type to use for unaligned operations. */
 #define SHA_BLOCKSIZE   64
 #define SHA_DIGESTSIZE    20
@@ -56,7 +59,7 @@ size_t sha_fread( void *, size_t, size_t, struct SHA_MY_FILE * );
 void sha_update( struct SHA_INFO *, BYTE *, int );
 void sha_final( struct SHA_INFO * );
 void sha_stream( struct SHA_INFO *, struct SHA_MY_FILE * );
-void sha_main( const unsigned char * data, unsigned long long data_size );
+void sha_main( const uint8_t *data, uint64_t data_size );
 int sha_return ( void );
 //int main( void );
 

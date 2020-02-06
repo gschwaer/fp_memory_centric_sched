@@ -21,6 +21,7 @@
 #include "memset.h"
 #include "sha.h"
 
+
 /*
   Declaration of global variables
 */
@@ -195,7 +196,7 @@ void sha_stream( struct SHA_INFO *sha_info, struct SHA_MY_FILE *fin )
   sha_final( sha_info );
 }
 
-void /*_Pragma( "entrypoint" )*/ sha_main( const unsigned char * data, unsigned long long data_size )
+void /*_Pragma( "entrypoint" )*/ sha_main( const uint8_t *data, uint64_t data_size )
 {
   struct SHA_MY_FILE fin;
   fin.data = data;

@@ -107,7 +107,7 @@ CPU mySystem {
     USEDYNAMICAPI = TRUE {
       TASK_ARRAY_SIZE     = 8;
       SN_ARRAY_SIZE       = 8;
-      STACKS_MEMORY_SIZE  = 8192;
+      STACKS_MEMORY_SIZE  = 65536;//8192;
     };
 
     KERNEL_TYPE = OSEK {
