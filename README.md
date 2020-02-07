@@ -30,14 +30,14 @@ UART
 
 One UART is used by Jailhouse inbuild printk function __and__ the Erika calls to printk.
 
-To use the second UART (UART-C) ref. to `benchmarking/enable_uart_c.sh`. To monitor UART-C use minicom -D /dev/ttyUSB0 (or whatever your USB to serial adapter is detected as). It is advised to use minicom on you host machine to not slow down the TX2.
+To use the second UART (UART-C) ref. to `benchmarking/enable_uart_c.sh`. To monitor UART-C use minicom -D /dev/ttyUSB1 (or whatever your USB to serial adapter is detected as). Use minicom on you host machine to not slow down the TX2.
 
 
 Erika
 -----
 
 * Every inmate gets its cache partition from its A57 core ID (in the range of 0-3 on TX2).
-* To compile Erika applications for Jailhouse in Eclipse you need some files from the Jailhouse compilation. So after compiling Jailhouse copy the jailhouse folder back from the TX2 to the Host in place of the existing folder. The Erika Makefiles will then find the necessary libraries in the jailhouse folder.
+* To compile Erika applications for Jailhouse in Eclipse you need some files from the Jailhouse compilation. So after compiling Jailhouse copy the jailhouse folder back from the TX2 to the Host in place of the existing folder (copy_jailhouse_to_tx2.sh / copy_jailhouse_from_tx2.sh). The Erika Makefiles will then find the necessary libraries in the jailhouse folder.
 * Setup of dependencies see below
 
 
@@ -46,22 +46,22 @@ Jailhouse
 
 * There are two versions of memory arbitration implemented: TDMA and fixed priority. You can switch from one to the other in the file `include/jailhouse/config.h` (+ recompile & restart).
 * There is a define in the `fixed_priority.c` code which suspends linux cores in case the memory is in use (untested!). It should be easily adaptable for tdma as well.
-* Compilation might fail while Jailhouse is running.
+* Jailhouse compilation might fail while it is running.
 
 
 Test Runs
 ---------
 
-Example for sorting benchmark on one test cell:
+Example for sorting benchmark on all three cores:
 1. `./prepare_linux.sh`
 1. `sudo ./jetson_clocks.sh`
 1. `./enable_uart_c.sh`
 1. `./start_jailhouse.sh`
-1. `./add_test_cell.sh 0`
-1. `./run_erika_inmate.sh sorting/erika_inmate.bin 0`
+1. `./add_test_cells.sh`
+1. `./run_all_erika_inmate.sh`
 1. `./halt_linux` (will halt linux for 6 minutes)
-1. [on host] `minicom -D /dev/ttyUSB0 -C benchmark_sorting_capture_core0.csv`
-1. (alt:) setup using minicom, leave without resetting Ctrl+A,Q then use `cat /dev/ttyUSB0 > benchmark_sorting_capture_core0.csv`
+1. [on host] open UART-C using minicom, leave without resetting (Ctrl+A,Q) then use `timeout 6m cat /dev/ttyUSB1 > capture.csv`
+1. [on host] alternatively use `minicom -D /dev/ttyUSB1 -C capture.csv`
 
 Configs used:
 
