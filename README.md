@@ -1,5 +1,16 @@
-DPREM Erika on Jailhouse for Jetson TX2
-=======================================
+Fixed Priority Memory Centric Scheduler: Erika on Jailhouse (Jetson TX2)
+========================================================================
+
+Copyright Notice
+----------------
+
+* [Jailhouse](https://github.com/siemens/jailhouse): All files in the folder `jailhouse-master_dprem` are licensed according to the specified license (see files `README.md`, `LICENSING.md`, `COPYING`, and related). Credits for the cache coloring implementation go to the [High-Performance Real-Time Laboratory (HiPeRT Lab) at the University of Modena](https://git.hipert.unimore.it/rtes/jailhouse) and the [HERCULES Innovation Action of the EU project Horizon 2020](http://hercules2020.eu/).
+* [Erika](http://www.erika-enterprise.com/): All files in the folder `ee_files` are licensed according to the specified license (see files `README.md`, `LICENSE.TXT`, `THIRDPARTY.TXT`, and related, and [this website](http://www.erika-enterprise.com/index.php/erika3/licensing.html))
+* [TACLe-Bench](http://www.tacle.eu/index.php/activities/taclebench): All files in the folder `benchmarking/sha` are licensed according to the license specified in the file. For more details see the [TACLe-Bench repository](https://github.com/tacle/tacle-bench/tree/master/bench/kernel/sha).
+* Rest: For all files of this repository, without the subdirectories `ee_files` and `jailhouse-master_dprem`, which do not specify a different license in the file itself, the license will default to BSD Zero Clause License (see `DefaultLicense.txt`)
+* For any file, containing license information on its own, this specified license takes precedence.
+
+If there are any issues where a file in this repository violates the license terms of a respective property right owner, please write an issue and the file will be labeled correctly or removed.
 
 
 Prerequisites on Host
@@ -52,7 +63,7 @@ Jailhouse
 Test Runs
 ---------
 
-Example for sorting benchmark on all three cores:
+Example for running benchmarks on all three cores:
 1. `./prepare_linux.sh`
 1. `sudo ./jetson_clocks.sh`
 1. `./enable_uart_c.sh`
